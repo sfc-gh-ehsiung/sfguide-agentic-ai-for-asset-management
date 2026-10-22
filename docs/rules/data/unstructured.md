@@ -38,8 +38,8 @@ def get_entities_for_doc_type(session, doc_type, test_mode=False):
     # ✅ CORRECT: Use config-driven priority
     securities = session.sql(f"""
         SELECT s.SecurityID as id, s.Ticker
-        FROM SAM_DEMO.CURATED.DIM_SECURITY s
-        JOIN SAM_DEMO.CURATED.DIM_ISSUER i ON s.IssuerID = i.IssuerID
+        FROM LAB_ASSETAGENT_DB.CURATED.DIM_SECURITY s
+        JOIN LAB_ASSETAGENT_DB.CURATED.DIM_ISSUER i ON s.IssuerID = i.IssuerID
         WHERE s.AssetClass = 'Equity'
         ORDER BY 
             CASE 

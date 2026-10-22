@@ -26,8 +26,8 @@ Build a complete multi-agent AI system for investment management using Snowflake
 ### Step 2: Run Infrastructure Setup (2 minutes)
 
 Open [`scripts/setup.sql`](scripts/setup.sql) in the workspace and execute it. This creates:
-- `SAM_DEMO` database with all schemas
-- `SAM_DEMO_ROLE` with required privileges (including task execution)
+- `LAB_ASSETAGENT_DB` database with all schemas
+- `LAB_ASSETAGENT_ADMIN` with required privileges (including task execution)
 - Marketplace data share (Snowflake Public Data - Free)
 - Cortex AI enablement and Snowflake Intelligence
 
@@ -120,9 +120,9 @@ Each agent has documented demo scenarios with step-by-step conversations:
 
 To remove all demo objects:
 ```sql
-DROP DATABASE IF EXISTS SAM_DEMO;
-DROP WAREHOUSE IF EXISTS SAM_DEMO_WH;
-DROP ROLE IF EXISTS SAM_DEMO_ROLE;
+DROP DATABASE IF EXISTS LAB_ASSETAGENT_DB;
+DROP WAREHOUSE IF EXISTS LAB_ASSETAGENT_EXECUTION_WH;
+DROP ROLE IF EXISTS LAB_ASSETAGENT_ADMIN;
 ```
 
 ## Requirements

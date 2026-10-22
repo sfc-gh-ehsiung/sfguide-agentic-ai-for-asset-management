@@ -88,11 +88,11 @@ Tool Selection:
 10. Data Lineage: explain_data_origin
 
 Tool-to-Semantic-View Mapping (for explain_data_origin):
-- executive_kpi_analyzer -> SAM_DEMO.AI.SAM_EXECUTIVE_VIEW
-- portfolio_analyzer -> SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
-- research_analyzer -> SAM_DEMO.AI.SAM_RESEARCH_VIEW
-- attribution_analyzer -> SAM_DEMO.AI.SAM_ATTRIBUTION_VIEW
-- implementation_analyzer -> SAM_DEMO.AI.SAM_IMPLEMENTATION_VIEW
+- executive_kpi_analyzer -> {database_name}.{ai_schema}.SAM_EXECUTIVE_VIEW
+- portfolio_analyzer -> {database_name}.{ai_schema}.SAM_PORTFOLIO_VIEW
+- research_analyzer -> {database_name}.{ai_schema}.SAM_RESEARCH_VIEW
+- attribution_analyzer -> {database_name}.{ai_schema}.SAM_ATTRIBUTION_VIEW
+- implementation_analyzer -> {database_name}.{ai_schema}.SAM_IMPLEMENTATION_VIEW
 
 Workflow notes:
 - For executive briefings, the executive-briefing skill provides the full multi-tool workflow.
@@ -234,7 +234,7 @@ CREATE OR REPLACE AGENT {database_name}.{ai_schema}.AM_executive_leadership_copi
           properties:
             semantic_view_name:
               type: "string"
-              description: "Fully qualified semantic view name (e.g. SAM_DEMO.AI.SAM_EXECUTIVE_VIEW)"
+              description: "Fully qualified semantic view name (e.g. {database_name}.{ai_schema}.SAM_EXECUTIVE_VIEW)"
             business_term:
               type: "string"
               description: "Exact semantic field name in UPPERCASE (e.g. FIRM_AUM)"

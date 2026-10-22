@@ -297,9 +297,9 @@ python main.py --connection-name CONNECTION --scope semantic
 
 **Step 4**: Export from an existing view (if migrating):
 ```sql
-SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('SAM_DEMO.AI.EXISTING_VIEW');
+SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('LAB_ASSETAGENT_DB.AI.EXISTING_VIEW');
 ```
-Save output as `.yaml`, replace `SAM_DEMO` with `{{DATABASE}}`.
+Save output as `.yaml`, replace `LAB_ASSETAGENT_DB` with `{{DATABASE}}`.
 
 ### Semantic View Validation Template
 ```python

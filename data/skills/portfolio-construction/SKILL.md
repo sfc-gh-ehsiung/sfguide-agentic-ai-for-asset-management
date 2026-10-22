@@ -7,7 +7,7 @@ description: Use this skill when the user asks to "build a portfolio", "construc
 
 ## CRITICAL: Investable Universe Constraint
 
-**You MUST ONLY use tickers that exist in SAM_DEMO.CURATED.DIM_SECURITY.**
+**You MUST ONLY use tickers that exist in {{DATABASE}}.CURATED.DIM_SECURITY.**
 
 NEVER use ETF tickers (SPY, AGG, TLT, QQQ, VTI, IWM, GLD, etc.) or any ticker from your general training knowledge unless you have FIRST verified it exists in our database by querying the portfolio_modelling_analyzer tool.
 

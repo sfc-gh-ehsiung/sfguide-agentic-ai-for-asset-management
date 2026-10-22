@@ -87,11 +87,11 @@ tools:
 
 tool_resources:
   quantitative_analyzer:
-    semantic_view: "SAM_DEMO.AI.SAM_PORTFOLIO_VIEW"
+    semantic_view: "LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW"
     execution_environment:
       query_timeout: 30
       type: "warehouse"
-      warehouse: "SAM_DEMO_EXECUTION_WH"
+      warehouse: "LAB_ASSETAGENT_EXECUTION_WH"
 ```
 
 ### Cortex Search (Document Search)
@@ -114,7 +114,7 @@ tools:
 
 tool_resources:
   search_broker_research:
-    search_service: "SAM_DEMO.AI.SAM_BROKER_RESEARCH"
+    search_service: "LAB_ASSETAGENT_DB.AI.SAM_BROKER_RESEARCH"
     id_column: "DOCUMENT_ID"
     title_column: "DOCUMENT_TITLE"
     max_results: 4
@@ -145,8 +145,8 @@ tool_resources:
     execution_environment:
       query_timeout: 30
       type: "warehouse"
-      warehouse: "SAM_DEMO_EXECUTION_WH"
-    identifier: "SAM_DEMO.AI.MA_SIMULATION_TOOL"
+      warehouse: "LAB_ASSETAGENT_EXECUTION_WH"
+    identifier: "LAB_ASSETAGENT_DB.AI.MA_SIMULATION_TOOL"
     name: "MA_SIMULATION_TOOL(FLOAT, FLOAT)"    # Full signature required
     type: "function"                             # or "procedure"
 ```
@@ -157,7 +157,7 @@ After creation, register with Snowflake Intelligence:
 
 ```sql
 ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
-ADD AGENT SAM_DEMO.AI.AM_portfolio_manager_copilot;
+ADD AGENT LAB_ASSETAGENT_DB.AI.AM_portfolio_manager_copilot;
 ```
 
 This is automated in `create_agents.py`.

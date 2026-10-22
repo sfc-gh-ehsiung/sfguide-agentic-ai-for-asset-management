@@ -22,15 +22,15 @@ Trigger when the user asks:
 
 | Tool Name | Semantic View |
 |-----------|--------------|
-| quantitative_analyzer | SAM_DEMO.AI.SAM_ANALYST_VIEW |
-| financial_analyzer | SAM_DEMO.AI.SAM_SEC_FINANCIALS_VIEW |
-| implementation_analyzer | SAM_DEMO.AI.SAM_IMPLEMENTATION_VIEW |
-| supply_chain_analyzer | SAM_DEMO.AI.SAM_SUPPLY_CHAIN_VIEW |
-| stock_prices | SAM_DEMO.AI.SAM_STOCK_PRICES_VIEW |
-| sec_financials | SAM_DEMO.AI.SAM_SEC_FINANCIALS_VIEW |
-| executive_kpi_analyzer | SAM_DEMO.AI.SAM_EXECUTIVE_VIEW |
-| factor_model_analyzer | SAM_DEMO.AI.SAM_FACTOR_MODEL_VIEW |
-| regime_analyzer | SAM_DEMO.AI.SAM_REGIME_VIEW |
+| quantitative_analyzer | {{DATABASE}}.AI.SAM_ANALYST_VIEW |
+| financial_analyzer | {{DATABASE}}.AI.SAM_SEC_FINANCIALS_VIEW |
+| implementation_analyzer | {{DATABASE}}.AI.SAM_IMPLEMENTATION_VIEW |
+| supply_chain_analyzer | {{DATABASE}}.AI.SAM_SUPPLY_CHAIN_VIEW |
+| stock_prices | {{DATABASE}}.AI.SAM_STOCK_PRICES_VIEW |
+| sec_financials | {{DATABASE}}.AI.SAM_SEC_FINANCIALS_VIEW |
+| executive_kpi_analyzer | {{DATABASE}}.AI.SAM_EXECUTIVE_VIEW |
+| factor_model_analyzer | {{DATABASE}}.AI.SAM_FACTOR_MODEL_VIEW |
+| regime_analyzer | {{DATABASE}}.AI.SAM_REGIME_VIEW |
 
 3. Call `explain_data_origin` with the semantic view name and field name
 

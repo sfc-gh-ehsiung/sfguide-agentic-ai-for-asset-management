@@ -93,7 +93,7 @@ REAL_DATA_SOURCES = {
 
 ### Source Table Mapping
 
-| Cybersyn Source Table | SAM_DEMO Target | Description |
+| Cybersyn Source Table | LAB_ASSETAGENT_DB Target | Description |
 |-----------------------|-----------------|-------------|
 | `STOCK_PRICE_TIMESERIES` | `MARKET_DATA.FACT_STOCK_PRICES` | Daily OHLCV prices from Nasdaq |
 | `SEC_METRICS_TIMESERIES` | `MARKET_DATA.FACT_SEC_SEGMENTS` | Revenue segments by geography/business |
@@ -139,7 +139,7 @@ REAL_DATA_SOURCES = {
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  1. DATABASE STRUCTURE (main.py → structured.create_database_structure)     │
-│     └── SAM_DEMO.{RAW, CURATED, MARKET_DATA, AI} schemas                    │
+│     └── LAB_ASSETAGENT_DB.{RAW, CURATED, MARKET_DATA, AI} schemas                    │
 │                                                                             │
 │  2. MARKET DATA ANCHOR (market_data.build_price_anchor)                     │
 │     └── FACT_STOCK_PRICES (establishes date anchor for all generation)      │
@@ -378,7 +378,7 @@ DIM_BENCHMARK (independent)
 ### CIK Linkage Map
 
 ```
-Cybersyn Data                          SAM_DEMO
+Cybersyn Data                          LAB_ASSETAGENT_DB
 ─────────────────────────────────────────────────────────────────
 COMPANY_INDEX.CIK ────────────────────► CURATED.DIM_ISSUER.CIK
      │                                       │

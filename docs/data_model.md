@@ -8,7 +8,7 @@ Data architecture documentation for Simulated Asset Management (SAM) demo using 
 
 ## Database Architecture
 
-**Database**: `SAM_DEMO`
+**Database**: `LAB_ASSETAGENT_DB`
 
 **Schemas**:
 | Schema | Objects | Description |
@@ -21,8 +21,8 @@ Data architecture documentation for Simulated Asset Management (SAM) demo using 
 **Warehouses**:
 | Warehouse | Size | Purpose |
 |-----------|------|---------|
-| `SAM_DEMO_EXECUTION_WH` | MEDIUM | Data generation and execution |
-| `SAM_DEMO_CORTEX_WH` | MEDIUM | Cortex Search services (5-minute target lag) |
+| `LAB_ASSETAGENT_EXECUTION_WH` | MEDIUM | Data generation and execution |
+| `LAB_ASSETAGENT_CORTEX_WH` | MEDIUM | Cortex Search services (5-minute target lag) |
 
 ---
 
@@ -396,7 +396,7 @@ REAL_DATA_SOURCES = {
 
 ### Source Table Mapping
 
-| Cybersyn Source Table | SAM_DEMO Target | Description |
+| Cybersyn Source Table | LAB_ASSETAGENT_DB Target | Description |
 |-----------------------|-----------------|-------------|
 | `STOCK_PRICE_TIMESERIES` | `MARKET_DATA.FACT_STOCK_PRICES` | Daily OHLCV prices from Nasdaq |
 | `SEC_CORPORATE_REPORT_ATTRIBUTES` | `MARKET_DATA.FACT_SEC_FINANCIALS` | XBRL financial statements |

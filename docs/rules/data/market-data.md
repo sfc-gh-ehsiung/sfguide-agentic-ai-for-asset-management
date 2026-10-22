@@ -96,7 +96,7 @@ AI_AGG(
 
 - Reads from `CURATED.COMPANY_EVENT_TRANSCRIPTS_CORPUS` (pre-flattened, speaker-enriched)
 - Corpus DOCUMENT_TEXT format: `"Speaker Name (Role): chunk_text"`
-- Runs on `SAM_DEMO_CORTEX_WH` (AI workload)
+- Runs on `LAB_ASSETAGENT_CORTEX_WH` (AI workload)
 - Must run AFTER pipeline execution (Step 4) builds the corpus table
 
 ### Geo Risk Score (SQL calculation — structured data, no AI needed)

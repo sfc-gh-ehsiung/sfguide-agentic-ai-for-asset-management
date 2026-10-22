@@ -16,7 +16,7 @@ Every tool description should include:
 ```yaml
 Tool Name: quantitative_analyzer
 Type: Cortex Analyst
-Semantic View: SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+Semantic View: LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
 
 Description: |
   Analyzes portfolio holdings, position weights, sector allocations, and mandate 
@@ -54,7 +54,7 @@ Description: |
 ```yaml
 Tool Name: search_broker_research
 Type: Cortex Search
-Service: SAM_DEMO.AI.SAM_BROKER_RESEARCH
+Service: LAB_ASSETAGENT_DB.AI.SAM_BROKER_RESEARCH
 
 Description: |
   Searches broker research reports and analyst notes for investment opinions, 
@@ -96,7 +96,7 @@ Description: |
 ### Stock Prices
 ```yaml
 Tool Name: stock_prices
-Semantic View: SAM_DEMO.AI.SAM_MARKET_VIEW
+Semantic View: LAB_ASSETAGENT_DB.AI.SAM_MARKET_VIEW
 
 Description: |
   Analyzes daily stock prices (OHLCV) from Nasdaq.
@@ -114,7 +114,7 @@ Description: |
 ### SEC Financials
 ```yaml
 Tool Name: sec_financials
-Semantic View: SAM_DEMO.AI.SAM_REAL_SEC_VIEW
+Semantic View: LAB_ASSETAGENT_DB.AI.SAM_REAL_SEC_VIEW
 
 Description: |
   Analyzes SEC financial metrics from 10-K and 10-Q filings.

@@ -15,8 +15,8 @@ This calls `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML` with `verify_only=TRUE` for e
 ### Validate a Single View
 ```sql
 CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
-  'SAM_DEMO.AI',
-  $$<yaml_content_with_SAM_DEMO_substituted>$$,
+  'LAB_ASSETAGENT_DB.AI',
+  $$<yaml_content_with_LAB_ASSETAGENT_DB_substituted>$$,
   TRUE
 );
 -- Returns: "YAML file is valid for creating a semantic view. No object has been created yet."
@@ -24,14 +24,14 @@ CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
 
 ### Export an Existing View as YAML (for comparison)
 ```sql
-SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('SAM_DEMO.AI.SAM_PORTFOLIO_VIEW');
+SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW');
 ```
 
 ### Round-Trip Validation
 After deploying from YAML, export the view and compare:
 1. Deploy: `python main.py --scope semantic`
-2. Export: `SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('SAM_DEMO.AI.VIEW_NAME')`
-3. Compare: Exported YAML should match the source file (with `{{DATABASE}}` → `SAM_DEMO`)
+2. Export: `SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('LAB_ASSETAGENT_DB.AI.VIEW_NAME')`
+3. Compare: Exported YAML should match the source file (with `{{DATABASE}}` → `LAB_ASSETAGENT_DB`)
 
 ---
 
@@ -39,10 +39,10 @@ After deploying from YAML, export the view and compare:
 
 ```sql
 -- 1. Verify view was created
-DESCRIBE SEMANTIC VIEW SAM_DEMO.AI.SAM_PORTFOLIO_VIEW;
+DESCRIBE SEMANTIC VIEW LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW;
 
 -- 2. List all views
-SHOW SEMANTIC VIEWS IN SAM_DEMO.AI;
+SHOW SEMANTIC VIEWS IN LAB_ASSETAGENT_DB.AI;
 ```
 
 ## Test Queries
@@ -58,21 +58,21 @@ SHOW SEMANTIC VIEWS IN SAM_DEMO.AI;
 ```sql
 -- Basic functionality
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     METRICS total_market_value_base
     DIMENSIONS portfolio_name
 ) LIMIT 5;
 
 -- Multiple dimensions
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     METRICS total_market_value_base, HOLDING_COUNT
     DIMENSIONS portfolio_name, industry, asset_class
 ) LIMIT 10;
 
 -- Cross-table (holdings + issuers)
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     METRICS total_market_value_base
     DIMENSIONS company_name, industry
 ) LIMIT 10;
@@ -97,7 +97,7 @@ SELECT * FROM SEMANTIC_VIEW(
 **Fix**:
 ```sql
 -- Check exact column names
-DESCRIBE TABLE SAM_DEMO.CURATED.DIM_ISSUER;
+DESCRIBE TABLE LAB_ASSETAGENT_DB.CURATED.DIM_ISSUER;
 -- Use exact names from result
 ```
 
@@ -224,10 +224,10 @@ See `syntax.md` > "Classifying Columns: Facts vs Dimensions vs Metrics" for the 
 **Example - Correct vs Wrong**:
 ```sql
 -- ❌ WRONG - References semantic view in FROM
-"sql": "SELECT __portfolios.portfolio_name FROM SAM_DEMO.AI.SAM_PORTFOLIO_VIEW"
+"sql": "SELECT __portfolios.portfolio_name FROM LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW"
 
 -- ❌ WRONG - Uses SEMANTIC_VIEW() function  
-"sql": "SELECT * FROM SEMANTIC_VIEW(SAM_DEMO.AI.SAM_PORTFOLIO_VIEW METRICS ytd_return)"
+"sql": "SELECT * FROM SEMANTIC_VIEW(LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW METRICS ytd_return)"
 
 -- ❌ WRONG - Missing JOIN for PORTFOLIOS table
 "sql": "SELECT __portfolios.portfolio_name, __holdings.holding_date FROM __holdings"
@@ -278,10 +278,10 @@ def verify_tables(session, tables):
 
 # Required tables
 tables = [
-    'SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR',
-    'SAM_DEMO.CURATED.DIM_PORTFOLIO',
-    'SAM_DEMO.CURATED.DIM_SECURITY',
-    'SAM_DEMO.CURATED.DIM_ISSUER'
+    'LAB_ASSETAGENT_DB.CURATED.FACT_POSITION_DAILY_ABOR',
+    'LAB_ASSETAGENT_DB.CURATED.DIM_PORTFOLIO',
+    'LAB_ASSETAGENT_DB.CURATED.DIM_SECURITY',
+    'LAB_ASSETAGENT_DB.CURATED.DIM_ISSUER'
 ]
 verify_tables(session, tables)
 ```

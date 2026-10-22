@@ -2142,7 +2142,7 @@ POSITION_CHANGE_INSIGHT (stream-triggered: when new positions arrive)
 > **User**: "Show me the proactive insights tasks"
 
 ```sql
-SHOW TASKS IN SAM_DEMO.AI;
+SHOW TASKS IN LAB_ASSETAGENT_DB.AI;
 ```
 
 **Expected**: 4 tasks visible — DAILY_ATTRIBUTION_BRIEFING (root, scheduled), ANOMALY_ALERT_CHECK (child), ANOMALY_ALERT_PROMOTE (child), POSITION_CHANGE_INSIGHT (stream-triggered)
@@ -2168,12 +2168,12 @@ This demonstrates DATA_AGENT_RUN calling the attribution agent programmatically:
 ```sql
 SELECT TRY_PARSE_JSON(
     SNOWFLAKE.CORTEX.DATA_AGENT_RUN(
-        'SAM_DEMO.AI.AM_portfolio_manager_copilot',
+        'LAB_ASSETAGENT_DB.AI.AM_portfolio_manager_copilot',
         $${"messages": [{"role": "user", "content": [{"type": "text", "text": "Generate a brief daily attribution update for SAM Global Alpha. Focus on: 1) Most recent month active return, 2) Top 3 sector contributors, 3) Any anomaly flags. Keep under 200 words."}]}], "stream": false}$$
     )
 ):content[ARRAY_SIZE(TRY_PARSE_JSON(
     SNOWFLAKE.CORTEX.DATA_AGENT_RUN(
-        'SAM_DEMO.AI.AM_portfolio_manager_copilot',
+        'LAB_ASSETAGENT_DB.AI.AM_portfolio_manager_copilot',
         $${"messages": [{"role": "user", "content": [{"type": "text", "text": "Generate a brief daily attribution update for SAM Global Alpha. Focus on: 1) Most recent month active return, 2) Top 3 sector contributors, 3) Any anomaly flags. Keep under 200 words."}]}], "stream": false}$$
     )
 ):content)-1]:text::VARCHAR AS briefing;
@@ -2188,8 +2188,8 @@ SELECT TRY_PARSE_JSON(
 **Explanation**: Show the POSITION_CHANGE_STREAM on FACT_POSITION_DAILY_ABOR. When the ABOR system pushes new end-of-day positions, the stream captures the change, the task polls every 5 minutes, and when data is detected it calls the Portfolio Copilot agent to check for concentration breaches.
 
 ```sql
-SHOW STREAMS IN SAM_DEMO.AI;
--- POSITION_CHANGE_STREAM: ON TABLE SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR, APPEND_ONLY
+SHOW STREAMS IN LAB_ASSETAGENT_DB.AI;
+-- POSITION_CHANGE_STREAM: ON TABLE LAB_ASSETAGENT_DB.CURATED.FACT_POSITION_DAILY_ABOR, APPEND_ONLY
 ```
 
 **Talking Point**: This is event-driven AI. The agent doesn't wait to be asked — it automatically checks for limit breaches the moment new data arrives. The 5-minute polling means compliance gets alerted within minutes of a potential breach, not days.

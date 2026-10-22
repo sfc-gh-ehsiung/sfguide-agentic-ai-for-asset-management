@@ -76,7 +76,7 @@ Comprehensive troubleshooting guide for resolving issues with agents, semantic v
 
 **"YAML definition not found"**
 - **Cause**: Missing `.yaml` file in `python/ai/semantic_view_definitions/`
-- **Fix**: Create the YAML file or export from existing view: `SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('SAM_DEMO.AI.VIEW_NAME')`
+- **Fix**: Create the YAML file or export from existing view: `SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('LAB_ASSETAGENT_DB.AI.VIEW_NAME')`
 
 ### Creation Errors
 
@@ -217,20 +217,20 @@ Comprehensive troubleshooting guide for resolving issues with agents, semantic v
 ### Quick Health Check
 ```sql
 -- Verify core tables exist
-SELECT COUNT(*) FROM SAM_DEMO.CURATED.DIM_SECURITY;
-SELECT COUNT(*) FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR;
+SELECT COUNT(*) FROM LAB_ASSETAGENT_DB.CURATED.DIM_SECURITY;
+SELECT COUNT(*) FROM LAB_ASSETAGENT_DB.CURATED.FACT_POSITION_DAILY_ABOR;
 
 -- Check AI components
-SHOW SEMANTIC VIEWS IN SAM_DEMO.AI;
-SHOW CORTEX SEARCH SERVICES IN SAM_DEMO.AI;
+SHOW SEMANTIC VIEWS IN LAB_ASSETAGENT_DB.AI;
+SHOW CORTEX SEARCH SERVICES IN LAB_ASSETAGENT_DB.AI;
 ```
 
 ### Data Quality Validation
 ```sql
 -- Portfolio weight validation
 SELECT PortfolioID, SUM(PortfolioWeight) as TotalWeight
-FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR 
-WHERE HoldingDate = (SELECT MAX(HoldingDate) FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR)
+FROM LAB_ASSETAGENT_DB.CURATED.FACT_POSITION_DAILY_ABOR 
+WHERE HoldingDate = (SELECT MAX(HoldingDate) FROM LAB_ASSETAGENT_DB.CURATED.FACT_POSITION_DAILY_ABOR)
 GROUP BY PortfolioID;
 ```
 
@@ -238,7 +238,7 @@ GROUP BY PortfolioID;
 ```sql
 -- Test search functionality
 SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-    'SAM_DEMO.AI.SAM_BROKER_RESEARCH',
+    'LAB_ASSETAGENT_DB.AI.SAM_BROKER_RESEARCH',
     '{"query": "technology", "limit": 2}'
 );
 ```

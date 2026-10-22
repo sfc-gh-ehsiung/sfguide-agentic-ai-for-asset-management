@@ -115,11 +115,11 @@ Direct Data Queries (no skill needed):
 21. Brinson-Fachler attribution execution -> run_attribution
 
 Tool-to-Semantic-View Mapping (for explain_data_origin):
-- portfolio_analyzer -> SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
-- implementation_analyzer -> SAM_DEMO.AI.SAM_IMPLEMENTATION_VIEW
-- attribution_analyzer -> SAM_DEMO.AI.SAM_ATTRIBUTION_VIEW
-- market_analyzer -> SAM_DEMO.AI.SAM_MARKET_VIEW
-- research_analyzer -> SAM_DEMO.AI.SAM_RESEARCH_VIEW
+- portfolio_analyzer -> {database_name}.{ai_schema}.SAM_PORTFOLIO_VIEW
+- implementation_analyzer -> {database_name}.{ai_schema}.SAM_IMPLEMENTATION_VIEW
+- attribution_analyzer -> {database_name}.{ai_schema}.SAM_ATTRIBUTION_VIEW
+- market_analyzer -> {database_name}.{ai_schema}.SAM_MARKET_VIEW
+- research_analyzer -> {database_name}.{ai_schema}.SAM_RESEARCH_VIEW
 
 Key guidance:
 - portfolio_analyzer covers: holdings, AUM, sector allocation, benchmark comparison, ESG scores, compliance alerts, factor exposures, supply chain dependencies
@@ -398,7 +398,7 @@ CREATE OR REPLACE AGENT {database_name}.{ai_schema}.AM_portfolio_management_copi
           properties:
             semantic_view_name:
               type: "string"
-              description: "Fully qualified semantic view name (e.g. SAM_DEMO.AI.SAM_PORTFOLIO_VIEW)"
+              description: "Fully qualified semantic view name (e.g. {database_name}.{ai_schema}.SAM_PORTFOLIO_VIEW)"
             business_term:
               type: "string"
               description: "Semantic field name in UPPERCASE (e.g. TOTAL_MARKET_VALUE)"

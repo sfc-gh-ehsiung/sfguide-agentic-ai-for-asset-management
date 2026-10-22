@@ -69,18 +69,18 @@ YEARS_OF_HISTORY = 5
 
 # Database configuration
 DATABASE = {
-    'name': 'SAM_DEMO',
+    'name': 'LAB_ASSETAGENT_DB',
     'schemas': {'raw': 'RAW', 'curated': 'CURATED', 'market_data': 'MARKET_DATA', 'ai': 'AI'}
 }
 
 # Warehouse configuration  
 WAREHOUSES = {
     'execution': {
-        'name': 'SAM_DEMO_EXECUTION_WH',
+        'name': 'LAB_ASSETAGENT_EXECUTION_WH',
         'size': 'MEDIUM'
     },
     'cortex_search': {
-        'name': 'SAM_DEMO_CORTEX_WH',
+        'name': 'LAB_ASSETAGENT_CORTEX_WH',
         'size': 'MEDIUM',
         'target_lag': '5 minutes'
     }
@@ -189,7 +189,7 @@ See `docs/rules/development-patterns.md` for the full guide on adding new scenar
 
 ## Database Architecture
 
-**Database**: `SAM_DEMO`  
+**Database**: `LAB_ASSETAGENT_DB`  
 **Schemas**:
 - `RAW`: External provider data simulation + raw unstructured documents
 - `CURATED`: Industry-standard dimension/fact model ready for analysis
@@ -240,7 +240,7 @@ FACT_ESTIMATE_CONSENSUS      -- Analyst estimates derived from real SEC actuals
 #### ✅ **All 9 Agents: Automated SQL Creation Complete**
 **Status**: All agents automatically created via `python/create_agents.py` using SQL `CREATE AGENT` statements
 - ✅ **Automated Creation**: Agents created during `python main.py` build process
-- ✅ **Agent Location**: Created in `{DATABASE['name']}.{DATABASE['schemas']['ai']}` schema (e.g., SAM_DEMO.AI)
+- ✅ **Agent Location**: Created in `{DATABASE['name']}.{DATABASE['schemas']['ai']}` schema (e.g., LAB_ASSETAGENT_DB.AI)
 - ✅ **Auto-Registration**: Automatically registered with Snowflake Intelligence after creation
 - ✅ **Proper Formatting**: All instructions use YAML escaping (`\n`, `\"`, `''`)
 - ✅ **Full Instructions**: Portfolio Manager Co-Pilot, Research Copilot, Investment Strategy use complete docs
@@ -385,7 +385,7 @@ account = "your-account"
 user = "your-username"
 password = "your-password"
 warehouse = "your-warehouse"
-database = "SAM_DEMO"
+database = "LAB_ASSETAGENT_DB"
 schema = "CURATED"
 ```
 
@@ -397,12 +397,12 @@ Following [Snowflake reserved keywords](https://docs.snowflake.com/en/sql-refere
 **✅ All Object Names Verified Safe:**
 - **Table Names**: DIM_SECURITY, DIM_ISSUER, FACT_POSITION_DAILY_ABOR, FACT_TRANSACTION, etc.
 - **Column Names**: SecurityID, IssuerID, PRIMARYTICKER, LEGALNAME, GICS_SECTOR, etc.
-- **Warehouse Names**: SAM_DEMO_EXECUTION_WH, SAM_DEMO_CORTEX_WH
+- **Warehouse Names**: LAB_ASSETAGENT_EXECUTION_WH, LAB_ASSETAGENT_CORTEX_WH
 - **AI Objects**: SAM_PORTFOLIO_VIEW, SAM_BROKER_RESEARCH, etc.
 
 **Naming Conventions Used:**
 - Underscore separation (PORTFOLIO_HOLDINGS not PORTFOLIO-HOLDINGS)
-- Descriptive prefixes (SAM_DEMO_, SAM_)
+- Descriptive prefixes (LAB_ASSETAGENT_DB_, SAM_)
 - No reserved words as primary identifiers
 - Consistent casing (UPPER_CASE for database objects)
 
@@ -445,25 +445,25 @@ Critical keywords that cause issues:
 ### Required Test Queries
 ```sql
 -- Test enhanced semantic view with issuer support
-DESCRIBE SEMANTIC VIEW SAM_DEMO.AI.SAM_PORTFOLIO_VIEW;
+DESCRIBE SEMANTIC VIEW LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW;
 
 -- Test basic portfolio analytics
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     METRICS TOTAL_MARKET_VALUE, HOLDING_COUNT
     DIMENSIONS PORTFOLIONAME, DESCRIPTION
 ) LIMIT 5;
 
 -- Test issuer-level analysis (enhanced capability)
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     METRICS ISSUER_EXPOSURE
     DIMENSIONS LEGALNAME, GICS_SECTOR
 ) LIMIT 5;
 
 -- Test enhanced search services with SecurityID attributes
 SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-    'SAM_DEMO.AI.SAM_BROKER_RESEARCH',
+    'LAB_ASSETAGENT_DB.AI.SAM_BROKER_RESEARCH',
     '{"query": "technology investment", "limit": 2}'
 );
 
@@ -472,7 +472,7 @@ SELECT
     COUNT(*) as transaction_count,
     COUNT(DISTINCT PortfolioID) as portfolios_with_transactions,
     COUNT(DISTINCT SecurityID) as securities_with_transactions
-FROM SAM_DEMO.CURATED.FACT_TRANSACTION;
+FROM LAB_ASSETAGENT_DB.CURATED.FACT_TRANSACTION;
 ```
 
 ## Business Configuration Standards

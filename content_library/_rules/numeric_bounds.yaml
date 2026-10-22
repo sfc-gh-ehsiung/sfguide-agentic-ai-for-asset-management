@@ -232,10 +232,10 @@ tier2_derivations:
           s.Description as COMPANY_NAME,
           p.PortfolioWeight * 100 as WEIGHT_PCT,
           p.MarketValue_Base as MARKET_VALUE_USD
-        FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR p
-        JOIN SAM_DEMO.CURATED.DIM_SECURITY s ON p.SecurityID = s.SecurityID
+        FROM {{DATABASE}}.CURATED.FACT_POSITION_DAILY_ABOR p
+        JOIN {{DATABASE}}.CURATED.DIM_SECURITY s ON p.SecurityID = s.SecurityID
         WHERE p.PortfolioID = {{PORTFOLIO_ID}}
-        AND p.HoldingDate = (SELECT MAX(HoldingDate) FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR)
+        AND p.HoldingDate = (SELECT MAX(HoldingDate) FROM {{DATABASE}}.CURATED.FACT_POSITION_DAILY_ABOR)
         ORDER BY p.MarketValue_Base DESC
         LIMIT 10
       
@@ -245,10 +245,10 @@ tier2_derivations:
           CASE WHEN MAX(PortfolioWeight) > 0.065 THEN 'YES' ELSE 'NO' END as HAS_CONCENTRATION,
           MAX(PortfolioWeight) * 100 as MAX_POSITION_PCT,
           s.Description as LARGEST_POSITION_NAME
-        FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR p
-        JOIN SAM_DEMO.CURATED.DIM_SECURITY s ON p.SecurityID = s.SecurityID
+        FROM {{DATABASE}}.CURATED.FACT_POSITION_DAILY_ABOR p
+        JOIN {{DATABASE}}.CURATED.DIM_SECURITY s ON p.SecurityID = s.SecurityID
         WHERE p.PortfolioID = {{PORTFOLIO_ID}}
-        AND p.HoldingDate = (SELECT MAX(HoldingDate) FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR)
+        AND p.HoldingDate = (SELECT MAX(HoldingDate) FROM {{DATABASE}}.CURATED.FACT_POSITION_DAILY_ABOR)
         GROUP BY s.Description
         ORDER BY MAX(p.PortfolioWeight) DESC
         LIMIT 1
@@ -258,11 +258,11 @@ tier2_derivations:
         SELECT 
           i.GICS_Sector as SECTOR,
           SUM(p.PortfolioWeight) * 100 as SECTOR_WEIGHT_PCT
-        FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR p
-        JOIN SAM_DEMO.CURATED.DIM_SECURITY s ON p.SecurityID = s.SecurityID
-        JOIN SAM_DEMO.CURATED.DIM_ISSUER i ON s.IssuerID = i.IssuerID
+        FROM {{DATABASE}}.CURATED.FACT_POSITION_DAILY_ABOR p
+        JOIN {{DATABASE}}.CURATED.DIM_SECURITY s ON p.SecurityID = s.SecurityID
+        JOIN {{DATABASE}}.CURATED.DIM_ISSUER i ON s.IssuerID = i.IssuerID
         WHERE p.PortfolioID = {{PORTFOLIO_ID}}
-        AND p.HoldingDate = (SELECT MAX(HoldingDate) FROM SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR)
+        AND p.HoldingDate = (SELECT MAX(HoldingDate) FROM {{DATABASE}}.CURATED.FACT_POSITION_DAILY_ABOR)
         GROUP BY i.GICS_Sector
         ORDER BY SECTOR_WEIGHT_PCT DESC
 

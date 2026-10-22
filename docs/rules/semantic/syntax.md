@@ -129,7 +129,7 @@ verified_queries:
 1. Edit the YAML file in `semantic_view_definitions/`
 2. Validate: `--scope semantic --verify-only`
 3. Deploy: `--scope semantic`
-4. Re-export to verify round-trip: `SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('SAM_DEMO.AI.VIEW_NAME')`
+4. Re-export to verify round-trip: `SELECT SYSTEM$READ_YAML_FROM_SEMANTIC_VIEW('LAB_ASSETAGENT_DB.AI.VIEW_NAME')`
 
 ---
 
@@ -295,13 +295,13 @@ dimensions:
 ```sql
 -- ✅ Query uses "industry" (the name):
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     DIMENSIONS industry
 )
 
 -- ❌ Wrong - uses "SIC_DESCRIPTION" (the expr):
 SELECT * FROM SEMANTIC_VIEW(
-    SAM_DEMO.AI.SAM_PORTFOLIO_VIEW
+    LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW
     DIMENSIONS SIC_DESCRIPTION
 )
 ```
@@ -381,10 +381,10 @@ GROUP BY __portfolios.portfolio_name
 ORDER BY YTD_RETURN DESC"
 
 -- ❌ WRONG - References semantic view in FROM
-"SELECT ... FROM SAM_DEMO.AI.SAM_PORTFOLIO_VIEW"
+"SELECT ... FROM LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW"
 
 -- ❌ WRONG - Uses SEMANTIC_VIEW() function (for ad-hoc queries, not VQRs)
-"SELECT * FROM SEMANTIC_VIEW(SAM_DEMO.AI.SAM_PORTFOLIO_VIEW METRICS ytd_return)"
+"SELECT * FROM SEMANTIC_VIEW(LAB_ASSETAGENT_DB.AI.SAM_PORTFOLIO_VIEW METRICS ytd_return)"
 
 -- ❌ WRONG - Missing explicit JOINs
 "SELECT __portfolios.portfolio_name FROM __holdings"
@@ -398,7 +398,7 @@ ORDER BY YTD_RETURN DESC"
 
 | Wrong | Correct |
 |-------|---------|
-| `FROM SAM_DEMO.AI.SEMANTIC_VIEW` | `FROM __holdings` |
+| `FROM LAB_ASSETAGENT_DB.AI.SEMANTIC_VIEW` | `FROM __holdings` |
 | `FROM SEMANTIC_VIEW(...)` | `FROM __holdings JOIN __portfolios ON (...)` |
 | `SELECT __portfolios.portfolio_name` (no JOIN) | `... JOIN __portfolios ON (...)` |
 | `__holdings.ytd_return` in aggregate | `AVG(__holdings.YTD_RETURN_PCT)` |
@@ -425,7 +425,7 @@ ORDER BY Sector_Value DESC"
 Before creating a new view, verify underlying tables exist:
 
 ```sql
-DESCRIBE TABLE SAM_DEMO.CURATED.DIM_ISSUER;
-DESCRIBE TABLE SAM_DEMO.CURATED.DIM_SECURITY;
-DESCRIBE TABLE SAM_DEMO.CURATED.FACT_POSITION_DAILY_ABOR;
+DESCRIBE TABLE LAB_ASSETAGENT_DB.CURATED.DIM_ISSUER;
+DESCRIBE TABLE LAB_ASSETAGENT_DB.CURATED.DIM_SECURITY;
+DESCRIBE TABLE LAB_ASSETAGENT_DB.CURATED.FACT_POSITION_DAILY_ABOR;
 ```

@@ -48,7 +48,7 @@ $$;
 
 | Context | Write | Result | Purpose |
 |---------|-------|--------|---------|
-| Config injection | `{config.DATABASE['name']}` | `SAM_DEMO` | Build-time value |
+| Config injection | `{config.DATABASE['name']}` | `LAB_ASSETAGENT_DB` | Build-time value |
 | Inner f-string var | `{{my_variable}}` | `{my_variable}` | Snowflake Python |
 | Dict literal | `{{key: value}}` | `{key: value}` | Dict in Snowflake |
 | Triple quotes | `\"\"\"` | `"""` | Docstrings |
