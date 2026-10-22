@@ -39,12 +39,11 @@ tables:
         data_type: VARCHAR(50)
         is_enum: true
         sample_values:
-          - "SCREENING"
-          - "DUE_DILIGENCE"
-          - "IC_REVIEW"
-          - "NEGOTIATION"
-          - "CLOSED"
-          - "PASSED"
+          - "Due Diligence"
+          - "Indicative Offer"
+          - "SPA"
+          - "Screening"
+          - "Signed"
       - name: deal_type
         synonyms:
           - transaction_type

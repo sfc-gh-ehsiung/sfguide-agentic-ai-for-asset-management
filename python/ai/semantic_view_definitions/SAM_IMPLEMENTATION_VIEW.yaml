@@ -380,10 +380,9 @@ tables:
         data_type: VARCHAR(7)
         is_enum: true
         sample_values:
-          - "PENDING"
-          - "SETTLED"
-          - "FAILED"
-          - "CANCELLED"
+          - "Failed"
+          - "Pending"
+          - "Settled"
     facts:
       - name: settlement_value
         description: "Settlement value of the trade"

@@ -26,14 +26,12 @@ tables:
           - type
           - category
           - insight_category
-        description: "Type of insight: DAILY_BRIEFING, ANOMALY_ALERT, or POSITION_CHANGE"
+        description: "Type of insight. Currently generated: MORNING_BRIEFING"
         expr: INSIGHTTYPE
         data_type: VARCHAR(50)
         is_enum: true
         sample_values:
-          - "ANOMALY_ALERT"
-          - "DAILY_BRIEFING"
-          - "POSITION_CHANGE"
+          - "MORNING_BRIEFING"
       - name: portfolio_name
         synonyms:
           - portfolio

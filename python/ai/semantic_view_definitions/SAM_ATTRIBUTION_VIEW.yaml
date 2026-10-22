@@ -361,10 +361,9 @@ tables:
         data_type: VARCHAR(20)
         is_enum: true
         sample_values:
-          - "MONTHLY"
           - "QTD"
-          - "YTD"
           - "TRAILING_12M"
+          - "YTD"
       - name: linked_grouping_dimension
         description: "Grouping dimension for linked attribution: SECTOR, COUNTRY, or INDUSTRY"
         expr: GROUPINGDIMENSION
@@ -619,9 +618,8 @@ tables:
         data_type: VARCHAR(12)
         is_enum: true
         sample_values:
-          - "RISK_ON"
+          - "NEUTRAL"
           - "RISK_OFF"
-          - "TRANSITIONAL"
       - name: volatility_regime
         synonyms:
           - vol_regime

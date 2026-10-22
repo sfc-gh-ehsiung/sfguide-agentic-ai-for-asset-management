@@ -6,8 +6,7 @@ tables:
       - sector_benchmarks
       - market_data
       - sector_spreads
-      - defaults
-    description: "Credit market sector benchmarks including spreads, default rates, and issuance volumes"
+    description: "External credit market benchmarks by sector (PitchBook LCD, Bloomberg, S&P Capital IQ). One row per sector, source and quarterly report date. These are market figures, not SAM portfolio figures."
     base_table:
       database: {{DATABASE}}
       schema: MARKET_DATA
@@ -17,7 +16,7 @@ tables:
         - benc_pk_benchmarkid
     dimensions:
       - name: benc_pk_benchmarkid
-        description: "BENCHMARKID for benchmarks"
+        description: "Unique benchmark record identifier"
         expr: BENCHMARKID
         data_type: "NUMBER(38,0)"
       - name: benchmark_sector
@@ -37,27 +36,37 @@ tables:
         data_type: VARCHAR(50)
     facts:
       - name: avg_interest_coverage
-        description: "Average interest coverage ratio across portfolio"
+        synonyms:
+          - sector_icr_value
+        description: "Average interest coverage ratio (x) for the sector, from the external benchmark source."
         expr: AVGINTERESTCOVERAGE
         data_type: "NUMBER(6,2)"
         access_modifier: public_access
       - name: avg_spread_bps
-        description: "Average spread in basis points across portfolio"
+        synonyms:
+          - sector_spread_value
+        description: "Average new-issue spread in bps for the sector, from the external benchmark source."
         expr: AVGSPREAD_BPS
         data_type: "NUMBER(38,0)"
         access_modifier: public_access
       - name: default_rate_pct
-        description: "Portfolio default rate as percentage"
+        synonyms:
+          - sector_default_pct
+        description: "Sector default rate (%) from the external benchmark source."
         expr: DEFAULTRATE_PCT
         data_type: "NUMBER(6,2)"
         access_modifier: public_access
       - name: median_leverage
-        description: "Median leverage ratio across borrowers"
+        synonyms:
+          - sector_median_leverage_value
+        description: "Median leverage multiple (x) for the sector, from the external benchmark source."
         expr: MEDIANLEVERAGE
         data_type: "NUMBER(6,2)"
         access_modifier: public_access
       - name: recovery_rate_pct
-        description: "Expected recovery rate as percentage"
+        synonyms:
+          - sector_recovery_pct
+        description: "Sector recovery rate (%) on defaulted debt, from the external benchmark source."
         expr: RECOVERYRATE_PCT
         data_type: "NUMBER(6,2)"
         access_modifier: public_access
@@ -112,12 +121,12 @@ tables:
         expr: REPORTDATE
         data_type: DATE
   - name: borrowers
+    description: "Private credit borrower companies in SAM's funds. One row per borrower, with sector, sponsor, fund, geography, credit rating and monitoring status. Linked to FACILITIES, which links on to COVENANTS."
     synonyms:
       - credits
       - companies
       - issuers
       - obligors
-    description: "Private credit borrower companies with sector, sponsor, and rating information"
     base_table:
       database: {{DATABASE}}
       schema: CURATED
@@ -127,7 +136,7 @@ tables:
         - borr_pk_borrowerid
     dimensions:
       - name: borr_pk_borrowerid
-        description: "BORROWERID for borrowers"
+        description: "Unique borrower identifier"
         expr: BORROWERID
         data_type: "NUMBER(38,0)"
       - name: borrower_name
@@ -140,17 +149,16 @@ tables:
         expr: BORROWERNAME
         data_type: VARCHAR(255)
       - name: borrower_status
+        description: "Borrower monitoring status. Values: Active, Watchlist (heightened credit monitoring)."
+        sample_values:
+          - "Active"
+          - "Watchlist"
         synonyms:
           - watchlist
           - credit_status
-        description: "Borrower status: Active or Watchlist"
         expr: STATUS
         data_type: VARCHAR(20)
         is_enum: true
-        sample_values:
-          - "ACTIVE"
-          - "WATCHLIST"
-          - "DEFAULT"
       - name: credit_rating
         synonyms:
           - rating
@@ -162,7 +170,6 @@ tables:
       - name: geography
         synonyms:
           - region
-          - market
           - country
         description: Borrower geography
         expr: GEOGRAPHY
@@ -208,9 +215,8 @@ tables:
     synonyms:
       - compliance
       - covenant_tests
-      - breaches
       - waivers
-    description: Covenant compliance tracking with breach flags and waiver status
+    description: "Monthly financial covenant tests. One row per facility, covenant type and test date, with threshold, actual value, headroom %, breach flag and waiver/cure status."
     base_table:
       database: {{DATABASE}}
       schema: CURATED
@@ -222,30 +228,31 @@ tables:
         - test_date
     dimensions:
       - name: cove_pk_facilityid
-        description: "FACILITYID for covenants"
+        description: "Facility the covenant test applies to"
         expr: FACILITYID
         data_type: "NUMBER(38,0)"
       - name: breach_flag
         synonyms:
           - breach
-          - default
           - violation
         description: Whether covenant was breached
         expr: BREACHFLAG
         data_type: BOOLEAN
       - name: covenant_status
+        description: "Outcome of the covenant test. Values: Compliant, Tight (compliant with thin headroom), Breach, Waiver Granted, Equity Cure."
+        sample_values:
+          - "Compliant"
+          - "Tight"
+          - "Breach"
+          - "Waiver Granted"
+          - "Equity Cure"
         synonyms:
           - compliance_status
           - covenant_result
           - test_result
-        description: "Covenant test status: Compliant, Tight, Breach, Waiver Granted, Equity Cure"
         expr: STATUS
         data_type: VARCHAR(134217728)
         is_enum: true
-        sample_values:
-          - "COMPLIANT"
-          - "BREACH"
-          - "WAIVER"
       - name: covenant_type
         synonyms:
           - covenant
@@ -313,12 +320,12 @@ tables:
         data_type: FLOAT
         access_modifier: public_access
       - name: headroom
+        description: "% cushion between actual value and covenant threshold; below 10 is tight."
         synonyms:
           - covenant_headroom
           - cushion
           - buffer
           - slack
-        description: Covenant headroom percentage
         expr: HEADROOM_PCT
         data_type: FLOAT
         access_modifier: public_access
@@ -327,18 +334,17 @@ tables:
         synonyms:
           - breaches
           - violations
-          - defaults
           - covenant_breaches
         description: Number of covenant breaches
         expr: COUNT(CASE WHEN covenants.breach_flag = TRUE THEN 1 END)
         access_modifier: public_access
   - name: facilities
+    description: "Credit facilities lent to borrowers. One row per facility, with commitment, drawn amount, spread over SOFR, structure and call protection. Each borrower can have several facilities."
     synonyms:
       - loans
       - tranches
       - credit_facilities
       - debt
-    description: "Credit facilities with terms, pricing, and structure details"
     base_table:
       database: {{DATABASE}}
       schema: CURATED
@@ -348,11 +354,11 @@ tables:
         - faci_pk_facilityid
     dimensions:
       - name: faci_pk_borrowerid
-        description: "BORROWERID for facilities"
+        description: "Borrower that owns the facility"
         expr: "BORROWERID"
         data_type: "NUMBER(38,0)"
       - name: faci_pk_facilityid
-        description: "FACILITYID for facilities"
+        description: "Unique facility identifier"
         expr: FACILITYID
         data_type: "NUMBER(38,0)"
       - name: call_protection
@@ -364,19 +370,20 @@ tables:
         expr: CALLPROTECTION
         data_type: VARCHAR(100)
       - name: facility_type
+        description: "Facility structure. Values: Term Loan B, Unitranche, Revolver, Delayed Draw TL."
+        sample_values:
+          - "Term Loan B"
+          - "Unitranche"
+          - "Revolver"
+          - "Delayed Draw TL"
         synonyms:
           - loan_type
           - tranche
           - structure
           - instrument
-        description: "Facility type: Term Loan B, Unitranche, Revolver, Delayed Draw TL"
         expr: FACILITYTYPE
         data_type: VARCHAR(50)
         is_enum: true
-        sample_values:
-          - "TERM_LOAN"
-          - "REVOLVER"
-          - "DELAYED_DRAW"
       - name: pik_toggle
         synonyms:
           - pik
@@ -387,29 +394,34 @@ tables:
         data_type: BOOLEAN
       - name: rate_type
         synonyms:
-          - rate
+          - pricing_text
           - coupon
           - interest_rate
-        description: Interest rate type e.g. SOFR + 425bps
+        description: "Floating-rate pricing text for the facility in the form 'SOFR + <spread>bps' (e.g. 'SOFR + 425bps'). All facilities are SOFR-based floating rate; use SPREAD_BPS for numeric spread analysis."
         expr: RATETYPE
         data_type: VARCHAR(50)
-        is_enum: true
-        sample_values:
-          - "FLOATING"
-          - "FIXED"
     facts:
       - name: commitment_mm
-        description: "Total commitment amount in millions"
+        synonyms:
+          - commitment_amount
+          - facility_size_mm
+        description: "Total committed facility amount, USD millions."
         expr: COMMITMENT_MM
         data_type: "NUMBER(12,2)"
         access_modifier: public_access
       - name: drawn_mm
-        description: "Drawn amount in millions"
+        synonyms:
+          - outstanding_mm
+          - funded_mm
+        description: "Funded/outstanding amount, USD millions."
         expr: DRAWN_MM
         data_type: "NUMBER(12,2)"
         access_modifier: public_access
       - name: spread_bps
-        description: "Spread in basis points above reference rate"
+        synonyms:
+          - facility_spread
+          - margin_bps
+        description: "Facility spread over SOFR, in basis points."
         expr: SPREAD_BPS
         data_type: "NUMBER(38,0)"
         access_modifier: public_access
@@ -445,8 +457,7 @@ tables:
     synonyms:
       - quarterly_results
       - performance
-      - earnings
-    description: Quarterly financial metrics for borrowers including leverage and coverage ratios
+    description: "Quarterly borrower financials. One row per borrower per reporting quarter, with revenue, EBITDA, free cash flow, and leverage and coverage ratios."
     base_table:
       database: {{DATABASE}}
       schema: CURATED
@@ -457,7 +468,7 @@ tables:
         - report_date
     dimensions:
       - name: fina_pk_borrowerid
-        description: "BORROWERID for financials"
+        description: "Borrower the financials belong to"
         expr: BORROWERID
         data_type: "NUMBER(38,0)"
       - name: report_date
@@ -470,42 +481,59 @@ tables:
         data_type: VARCHAR(134217728)
     facts:
       - name: ebitda_margin
-        description: "EBITDA margin as percentage of revenue"
+        synonyms:
+          - margin_pct
+        description: "EBITDA as % of revenue for the quarter."
         expr: EBITDA_MARGIN
         data_type: FLOAT
         access_modifier: public_access
       - name: ebitda_mm
-        description: "EBITDA in millions"
+        synonyms:
+          - ebitda_value
+        description: "Quarterly EBITDA, USD millions."
         expr: EBITDA_MM
         data_type: FLOAT
         access_modifier: public_access
       - name: fixed_charge_coverage
-        description: "Fixed charge coverage ratio"
+        synonyms:
+          - fccr_value
+        description: "(EBITDA − capex) / fixed charges (x)."
         expr: FIXEDCHARGECOVERAGE
         data_type: FLOAT
         access_modifier: public_access
       - name: free_cash_flow_mm
-        description: "Free cash flow in millions"
+        synonyms:
+          - fcf_mm
+        description: "Quarterly free cash flow, USD millions."
         expr: FREECASHFLOW_MM
         data_type: FLOAT
         access_modifier: public_access
       - name: interest_coverage
-        description: "Interest coverage ratio (EBITDA / interest expense)"
+        synonyms:
+          - icr_value
+        description: "EBITDA / interest expense (x)."
         expr: INTERESTCOVERAGE
         data_type: FLOAT
         access_modifier: public_access
       - name: net_leverage
-        description: "Net leverage ratio (net debt / EBITDA)"
+        synonyms:
+          - net_debt_to_ebitda
+        description: "(Total debt − cash) / EBITDA (x)."
         expr: NETLEVERAGE
         data_type: FLOAT
         access_modifier: public_access
       - name: revenue_mm
-        description: "Revenue in millions"
+        synonyms:
+          - revenue_value
+          - sales_mm
+        description: "Quarterly revenue, USD millions."
         expr: REVENUE_MM
         data_type: FLOAT
         access_modifier: public_access
       - name: total_leverage
-        description: "Total leverage ratio (total debt / EBITDA)"
+        synonyms:
+          - total_debt_to_ebitda
+        description: "Total debt / EBITDA (x)."
         expr: TOTALLEVERAGE
         data_type: FLOAT
         access_modifier: public_access
@@ -540,11 +568,11 @@ tables:
         expr: AVG(net_leverage)
         access_modifier: public_access
       - name: average_total_leverage
+        description: "Average total leverage ratio (Total Debt / EBITDA), expressed as a multiple (x)."
         synonyms:
           - leverage
           - debt_to_ebitda
           - gearing
-        description: Total leverage ratio (Net Debt / EBITDA)
         expr: AVG(total_leverage)
         access_modifier: public_access
       - name: total_ebitda_mm
@@ -574,12 +602,12 @@ tables:
         expr: SUM(revenue_mm)
         access_modifier: public_access
   - name: pipeline
+    description: "Prospective deals being originated. One row per deal, with target, sponsor, sector, stage, proposed size, spread and leverage. Not linked to the existing portfolio; expected close dates can be in the future."
     synonyms:
       - deals
       - new_deals
       - origination
       - opportunities
-    description: "New deal pipeline with pricing, leverage, and stage information"
     base_table:
       database: {{DATABASE}}
       schema: CURATED
@@ -589,39 +617,37 @@ tables:
         - pipe_pk_dealid
     dimensions:
       - name: pipe_pk_dealid
-        description: "DEALID for pipeline"
+        description: "Unique pipeline deal identifier"
         expr: DEALID
         data_type: "NUMBER(38,0)"
       - name: deal_stage
+        description: "Current stage of the pipeline deal. Values: Screening, Term Sheet, Due Diligence, Commitment, Allocation, Mandate."
+        sample_values:
+          - "Screening"
+          - "Term Sheet"
+          - "Due Diligence"
+          - "Commitment"
+          - "Allocation"
+          - "Mandate"
         synonyms:
           - stage
           - pipeline_stage
           - deal_status
-        description: "Deal stage: Screening, Term Sheet, Due Diligence, Commitment, Allocation, Mandate"
         expr: DEALSTAGE
         data_type: VARCHAR(50)
         is_enum: true
-        sample_values:
-          - "SCREENING"
-          - "DUE_DILIGENCE"
-          - "IC_REVIEW"
-          - "NEGOTIATION"
-          - "CLOSED"
-          - "PASSED"
       - name: deal_type
+        description: "Transaction type of the pipeline deal. Values: LBO, Add-on, Refinancing."
+        sample_values:
+          - "LBO"
+          - "Add-on"
+          - "Refinancing"
         synonyms:
           - transaction_type
           - deal_structure
-        description: "Deal type: LBO, Refinancing, Add-on, Incremental TL"
         expr: DEALTYPE
         data_type: VARCHAR(50)
         is_enum: true
-        sample_values:
-          - "Platform"
-          - "Add-on"
-          - "Carve-out"
-          - "Take-Private"
-          - "Growth Capital"
       - name: pipeline_facility_type
         synonyms:
           - pipeline_loan_type
@@ -658,17 +684,24 @@ tables:
         data_type: VARCHAR(255)
     facts:
       - name: deal_size_mm
-        description: "Deal size in millions"
+        synonyms:
+          - deal_amount
+          - ticket_size
+        description: "Proposed deal size, USD millions."
         expr: DEALSIZE_MM
         data_type: "NUMBER(12,2)"
         access_modifier: public_access
       - name: expected_leverage
-        description: "Expected leverage multiple"
+        synonyms:
+          - proposed_leverage_value
+        description: "Expected total leverage at close, debt / EBITDA (x)."
         expr: EXPECTEDLEVERAGE
         data_type: "NUMBER(6,2)"
         access_modifier: public_access
       - name: pipeline_spread_bps
-        description: "Pipeline deal spread in basis points"
+        synonyms:
+          - proposed_spread_value
+        description: "Proposed spread over SOFR, in basis points."
         expr: SPREAD_BPS
         data_type: "NUMBER(38,0)"
         access_modifier: public_access
@@ -736,37 +769,37 @@ relationships:
       - left_column: fina_pk_borrowerid
         right_column: borr_pk_borrowerid
 module_custom_instructions:
-  sql_generation: "There is no LATEST_TEST_DATE column. To get the latest or most recent test date, use MAX(test_date) or ORDER BY test_date DESC LIMIT 1. test_date is a VARCHAR column. For latest financials use MAX(report_date). Round all monetary values to 2 decimal places. Round percentages to 1 decimal place. Round ratios like leverage and coverage to 1 decimal place. CRITICAL: The pipeline table contains prospective deals with expected_close_date dates in the FUTURE. NEVER filter pipeline deals by expected_close_date <= CURRENT_DATE or any date restriction on expected_close_date. Pipeline queries should only filter by deal_stage (e.g. Term Sheet, Screening, Due Diligence). All pipeline deals are active and relevant regardless of their expected close date."
+  sql_generation: "There is no LATEST_TEST_DATE column. To get the latest or most recent test date, use MAX(test_date) or ORDER BY test_date DESC LIMIT 1. test_date is a VARCHAR column. For latest financials use MAX(report_date). Round all monetary values to 2 decimal places. Round percentages to 1 decimal place. Round ratios like leverage and coverage to 1 decimal place. CRITICAL: The pipeline table contains prospective deals with expected_close_date dates in the FUTURE. NEVER filter pipeline deals by expected_close_date <= CURRENT_DATE or any date restriction on expected_close_date. Pipeline queries should only filter by deal_stage (values: Screening, Term Sheet, Due Diligence, Commitment, Allocation, Mandate). All pipeline deals are active and relevant regardless of their expected close date."
 verified_queries:
   - name: PORTFOLIO_FLOATING_RATE_EXPOSURE
-    sql: "SELECT __facilities.facility_type, COUNT(*) AS facility_count, SUM(__facilities.COMMITMENT_MM) AS total_commitment_mm, SUM(__facilities.DRAWN_MM) AS total_drawn_mm, AVG(__facilities.SPREAD_BPS) AS average_spread_bps FROM __facilities GROUP BY __facilities.facility_type ORDER BY total_commitment_mm DESC"
+    sql: "SELECT __facilities.facility_type, COUNT(*) AS facility_count, SUM(__facilities.commitment_mm) AS total_commitment_mm, SUM(__facilities.drawn_mm) AS total_drawn_mm, ROUND(SUM(__facilities.spread_bps * __facilities.commitment_mm) / NULLIF(SUM(__facilities.commitment_mm), 0), 1) AS weighted_avg_spread_bps FROM __facilities GROUP BY __facilities.facility_type ORDER BY total_commitment_mm DESC"
     question: "Give me a summary of our credit portfolio floating rate exposure - total commitments, drawn amounts, weighted average spread, and breakdown by facility type"
     use_as_onboarding_question: true
   - name: BORROWER_FINANCIALS_AND_COVENANTS
-    sql: "SELECT __borrowers.borrower_name, __borrowers.credit_rating, __borrowers.borrower_status, __financials.report_date, SUM(__financials.revenue_mm) AS revenue_mm, SUM(__financials.ebitda_mm) AS ebitda_mm, AVG(__financials.total_leverage) AS total_leverage, AVG(__financials.interest_coverage) AS interest_coverage, AVG(__financials.fixed_charge_coverage) AS fixed_charge_coverage FROM __financials JOIN __borrowers ON (__financials.fin_borrower_id = __borrowers.borrower_id) WHERE __financials.report_date = (SELECT MAX(__financials.report_date) FROM __financials) GROUP BY __borrowers.borrower_name, __borrowers.credit_rating, __borrowers.borrower_status, __financials.report_date ORDER BY __borrowers.borrower_name"
+    sql: "WITH latest_cov AS (SELECT __facilities.faci_pk_borrowerid AS borrower_id, MIN(__covenants.headroom) AS min_covenant_headroom, COUNT_IF(__covenants.breach_flag) AS covenant_breaches FROM __covenants JOIN __facilities ON __covenants.cove_pk_facilityid = __facilities.faci_pk_facilityid WHERE __covenants.test_date = (SELECT MAX(__covenants.test_date) FROM __covenants) GROUP BY __facilities.faci_pk_borrowerid) SELECT __borrowers.borrower_name, __borrowers.credit_rating, __borrowers.borrower_status, __financials.report_date, ROUND(__financials.revenue_mm, 2) AS revenue_mm, ROUND(__financials.ebitda_mm, 2) AS ebitda_mm, ROUND(__financials.total_leverage, 1) AS total_leverage, ROUND(__financials.interest_coverage, 1) AS interest_coverage, ROUND(__financials.fixed_charge_coverage, 1) AS fixed_charge_coverage, ROUND(latest_cov.min_covenant_headroom, 1) AS min_covenant_headroom, latest_cov.covenant_breaches FROM __financials JOIN __borrowers ON __financials.fina_pk_borrowerid = __borrowers.borr_pk_borrowerid LEFT JOIN latest_cov ON latest_cov.borrower_id = __borrowers.borr_pk_borrowerid WHERE __financials.report_date = (SELECT MAX(__financials.report_date) FROM __financials) ORDER BY __borrowers.borrower_name"
     question: "Show me the current financial position and covenant status for a specific borrower including interest coverage, leverage, and covenant headroom"
     use_as_onboarding_question: false
   - name: COVENANT_BREACHES_AND_TIGHT_HEADROOM
-    sql: "SELECT __covenants.covenant_type, __covenants.covenant_status, __covenants.breach_flag, __covenants.covenant_threshold, __covenants.actual_value, __covenants.headroom, __covenants.waiver_requested, __covenants.waiver_granted, __covenants.test_date, __facilities.facility_type, __borrowers.borrower_name, __borrowers.credit_rating FROM __covenants JOIN __facilities ON (__covenants.FACILITYID = __facilities.FACILITYID) JOIN __borrowers ON (__facilities.fac_borrower_id = __borrowers.borrower_id) WHERE __covenants.test_date = (SELECT MAX(__covenants.TESTDATE) FROM __covenants) AND (__covenants.breach_flag = TRUE OR __covenants.headroom < 10) ORDER BY __covenants.headroom ASC"
+    sql: "SELECT __borrowers.borrower_name, __borrowers.credit_rating, __facilities.facility_type, __covenants.covenant_type, __covenants.covenant_status, __covenants.breach_flag, __covenants.covenant_threshold, __covenants.actual_value, ROUND(__covenants.headroom, 1) AS headroom, __covenants.waiver_requested, __covenants.waiver_granted, __covenants.test_date FROM __covenants JOIN __facilities ON __covenants.cove_pk_facilityid = __facilities.faci_pk_facilityid JOIN __borrowers ON __facilities.faci_pk_borrowerid = __borrowers.borr_pk_borrowerid WHERE __covenants.test_date = (SELECT MAX(__covenants.test_date) FROM __covenants) AND (__covenants.breach_flag = TRUE OR __covenants.headroom < 10) ORDER BY __covenants.headroom ASC"
     question: Show me all current covenant breaches and any borrowers with covenant headroom below 10 percent
     use_as_onboarding_question: true
   - name: BORROWER_COVENANT_TRAJECTORY
-    sql: "SELECT __covenants.test_date, __covenants.covenant_type, __covenants.covenant_threshold, __covenants.actual_value, __covenants.headroom, __covenants.covenant_status, __covenants.breach_flag, __covenants.waiver_requested, __covenants.waiver_granted, __covenants.equity_cure_available, __covenants.notes, __borrowers.borrower_name FROM __covenants JOIN __facilities ON (__covenants.FACILITYID = __facilities.FACILITYID) JOIN __borrowers ON (__facilities.fac_borrower_id = __borrowers.borrower_id) ORDER BY __borrowers.borrower_name, __covenants.covenant_type, __covenants.test_date"
+    sql: "SELECT __borrowers.borrower_name, __covenants.covenant_type, __covenants.test_date, __covenants.covenant_threshold, __covenants.actual_value, ROUND(__covenants.headroom, 1) AS headroom, __covenants.covenant_status, __covenants.breach_flag, __covenants.waiver_requested, __covenants.waiver_granted, __covenants.equity_cure_available, __covenants.notes FROM __covenants JOIN __facilities ON __covenants.cove_pk_facilityid = __facilities.faci_pk_facilityid JOIN __borrowers ON __facilities.faci_pk_borrowerid = __borrowers.borr_pk_borrowerid WHERE __covenants.test_date >= (SELECT TO_VARCHAR(DATEADD(month, -11, TO_DATE(MAX(__covenants.test_date))), 'YYYY-MM-DD') FROM __covenants) ORDER BY __borrowers.borrower_name, __covenants.covenant_type, __covenants.test_date"
     question: "Show me the detailed covenant tracking for a borrower over the last 4 quarters with trajectory of leverage, interest coverage, and headroom"
     use_as_onboarding_question: false
   - name: DEAL_PIPELINE_OVERVIEW
-    sql: "SELECT __pipeline.target_name, __pipeline.pipeline_sector, __pipeline.pipeline_sub_sector, __pipeline.pipeline_sponsor, __pipeline.deal_type, __pipeline.pipeline_facility_type, __pipeline.deal_stage, SUM(__pipeline.DEALSIZE_MM) AS deal_size_mm, AVG(__pipeline.SPREAD_BPS) AS spread_bps, AVG(__pipeline.EXPECTEDLEVERAGE) AS expected_leverage, __pipeline.expected_close_date FROM __pipeline GROUP BY __pipeline.target_name, __pipeline.pipeline_sector, __pipeline.pipeline_sub_sector, __pipeline.pipeline_sponsor, __pipeline.deal_type, __pipeline.pipeline_facility_type, __pipeline.deal_stage, __pipeline.expected_close_date ORDER BY __pipeline.expected_close_date ASC"
+    sql: "SELECT __pipeline.target_name, __pipeline.pipeline_sector, __pipeline.pipeline_sub_sector, __pipeline.pipeline_sponsor, __pipeline.deal_type, __pipeline.pipeline_facility_type, __pipeline.deal_stage, ROUND(__pipeline.deal_size_mm, 2) AS deal_size_mm, __pipeline.pipeline_spread_bps AS spread_bps, ROUND(__pipeline.expected_leverage, 1) AS expected_leverage, __pipeline.expected_close_date FROM __pipeline ORDER BY __pipeline.expected_close_date ASC"
     question: "Show me the current deal pipeline with stage, sector, size, spread, and expected leverage sorted by expected close date"
     use_as_onboarding_question: true
   - name: TERM_SHEET_DEALS_VS_PORTFOLIO_BENCHMARKS
-    sql: "SELECT __pipeline.target_name, __pipeline.pipeline_sector, SUM(__pipeline.DEALSIZE_MM) AS deal_size_mm, AVG(__pipeline.SPREAD_BPS) AS proposed_spread_bps, (SELECT AVG(__facilities.SPREAD_BPS) FROM __facilities) AS portfolio_avg_spread, (SELECT AVG(__benchmarks.AVGSPREAD_BPS) FROM __benchmarks WHERE __benchmarks.benchmark_sector = __pipeline.pipeline_sector) AS sector_benchmark_spread, AVG(__pipeline.EXPECTEDLEVERAGE) AS proposed_leverage, (SELECT AVG(__benchmarks.MEDIANLEVERAGE) FROM __benchmarks WHERE __benchmarks.benchmark_sector = __pipeline.pipeline_sector) AS sector_median_leverage, (SELECT AVG(__financials.total_leverage) FROM __financials WHERE __financials.report_date = (SELECT MAX(__financials.report_date) FROM __financials)) AS portfolio_avg_leverage, CASE WHEN AVG(__pipeline.SPREAD_BPS) < (SELECT AVG(__facilities.SPREAD_BPS) FROM __facilities) THEN 'TIGHT SPREAD' ELSE 'OK' END AS spread_flag, CASE WHEN AVG(__pipeline.EXPECTEDLEVERAGE) > (SELECT AVG(__benchmarks.MEDIANLEVERAGE) FROM __benchmarks WHERE __benchmarks.benchmark_sector = __pipeline.pipeline_sector) THEN 'HIGH LEVERAGE' ELSE 'OK' END AS leverage_flag FROM __pipeline WHERE __pipeline.deal_stage = 'Term Sheet' GROUP BY __pipeline.target_name, __pipeline.pipeline_sector ORDER BY proposed_spread_bps DESC"
+    sql: "WITH sector_bm AS (SELECT __benchmarks.benchmark_sector, AVG(__benchmarks.avg_spread_bps) AS sector_spread_bps, AVG(__benchmarks.median_leverage) AS sector_median_leverage FROM __benchmarks GROUP BY __benchmarks.benchmark_sector), portfolio AS (SELECT AVG(__facilities.spread_bps) AS portfolio_avg_spread_bps FROM __facilities) SELECT __pipeline.target_name, __pipeline.pipeline_sector, ROUND(__pipeline.deal_size_mm, 2) AS deal_size_mm, __pipeline.pipeline_spread_bps AS proposed_spread_bps, ROUND(portfolio.portfolio_avg_spread_bps, 1) AS portfolio_avg_spread_bps, ROUND(sector_bm.sector_spread_bps, 1) AS sector_spread_bps, ROUND(__pipeline.expected_leverage, 1) AS proposed_leverage, ROUND(sector_bm.sector_median_leverage, 1) AS sector_median_leverage, CASE WHEN __pipeline.pipeline_spread_bps < portfolio.portfolio_avg_spread_bps THEN 'TIGHT SPREAD' ELSE 'OK' END AS spread_flag, CASE WHEN __pipeline.expected_leverage > sector_bm.sector_median_leverage THEN 'HIGH LEVERAGE' ELSE 'OK' END AS leverage_flag FROM __pipeline CROSS JOIN portfolio LEFT JOIN sector_bm ON sector_bm.benchmark_sector = __pipeline.pipeline_sector WHERE __pipeline.deal_stage = 'Term Sheet' ORDER BY proposed_spread_bps DESC"
     question: "For the deals at Term Sheet stage, compare their proposed spread and leverage against our current portfolio average and the relevant sector benchmarks. Flag any deals that are tighter than portfolio average or above sector median leverage."
     use_as_onboarding_question: false
   - name: BORROWER_QUARTERLY_FINANCIAL_TREND
-    sql: "SELECT __borrowers.borrower_name, __financials.report_date, SUM(__financials.revenue_mm) AS revenue_mm, SUM(__financials.ebitda_mm) AS ebitda_mm, AVG(__financials.ebitda_margin) AS ebitda_margin, SUM(__financials.free_cash_flow_mm) AS free_cash_flow_mm, AVG(__financials.total_leverage) AS total_leverage, AVG(__financials.net_leverage) AS net_leverage FROM __financials JOIN __borrowers ON (__financials.fin_borrower_id = __borrowers.borrower_id) GROUP BY __borrowers.borrower_name, __financials.report_date ORDER BY __borrowers.borrower_name, __financials.report_date"
+    sql: "SELECT __borrowers.borrower_name, __financials.report_date, ROUND(__financials.revenue_mm, 2) AS revenue_mm, ROUND(__financials.ebitda_mm, 2) AS ebitda_mm, ROUND(__financials.ebitda_margin, 1) AS ebitda_margin, ROUND(__financials.free_cash_flow_mm, 2) AS free_cash_flow_mm, ROUND(__financials.total_leverage, 1) AS total_leverage, ROUND(__financials.net_leverage, 1) AS net_leverage FROM __financials JOIN __borrowers ON __financials.fina_pk_borrowerid = __borrowers.borr_pk_borrowerid QUALIFY DENSE_RANK() OVER (PARTITION BY __borrowers.borrower_name ORDER BY __financials.report_date DESC) <= 4 ORDER BY __borrowers.borrower_name, __financials.report_date"
     question: "What is the quarterly financial trend for a borrower over the last 4 quarters showing revenue, EBITDA, margin, free cash flow, and leverage"
     use_as_onboarding_question: false
   - name: TECHNOLOGY_SECTOR_BENCHMARK_COMPARISON
-    sql: "SELECT __borrowers.borrower_name, __borrowers.sector, AVG(__facilities.SPREAD_BPS) AS portfolio_spread_bps, AVG(__financials.total_leverage) AS portfolio_leverage, AVG(__financials.interest_coverage) AS portfolio_icr, (SELECT AVG(__benchmarks.AVGSPREAD_BPS) FROM __benchmarks WHERE __benchmarks.benchmark_sector = 'Technology') AS sector_avg_spread, (SELECT AVG(__benchmarks.DEFAULTRATE_PCT) FROM __benchmarks WHERE __benchmarks.benchmark_sector = 'Technology') AS sector_default_rate, (SELECT AVG(__benchmarks.RECOVERYRATE_PCT) FROM __benchmarks WHERE __benchmarks.benchmark_sector = 'Technology') AS sector_recovery_rate FROM __facilities JOIN __borrowers ON (__facilities.fac_borrower_id = __borrowers.borrower_id) JOIN __financials ON (__financials.fin_borrower_id = __borrowers.borrower_id) WHERE __borrowers.sector = 'Technology' AND __financials.report_date = (SELECT MAX(__financials.report_date) FROM __financials) GROUP BY __borrowers.borrower_name, __borrowers.sector ORDER BY portfolio_spread_bps DESC"
+    sql: "WITH bm AS (SELECT AVG(__benchmarks.avg_spread_bps) AS sector_avg_spread_bps, AVG(__benchmarks.median_leverage) AS sector_median_leverage, AVG(__benchmarks.default_rate_pct) AS sector_default_rate_pct, AVG(__benchmarks.recovery_rate_pct) AS sector_recovery_rate_pct FROM __benchmarks WHERE __benchmarks.benchmark_sector = 'Technology' AND __benchmarks.benchmark_report_date = (SELECT MAX(__benchmarks.benchmark_report_date) FROM __benchmarks WHERE __benchmarks.benchmark_sector = 'Technology')), fac AS (SELECT __facilities.faci_pk_borrowerid AS borrower_id, AVG(__facilities.spread_bps) AS portfolio_spread_bps FROM __facilities GROUP BY __facilities.faci_pk_borrowerid) SELECT __borrowers.borrower_name, ROUND(fac.portfolio_spread_bps, 1) AS portfolio_spread_bps, ROUND(__financials.total_leverage, 1) AS portfolio_leverage, ROUND(__financials.interest_coverage, 1) AS portfolio_icr, ROUND(bm.sector_avg_spread_bps, 1) AS sector_avg_spread_bps, ROUND(bm.sector_median_leverage, 1) AS sector_median_leverage, ROUND(bm.sector_default_rate_pct, 1) AS sector_default_rate_pct, ROUND(bm.sector_recovery_rate_pct, 1) AS sector_recovery_rate_pct FROM __borrowers JOIN __financials ON __financials.fina_pk_borrowerid = __borrowers.borr_pk_borrowerid LEFT JOIN fac ON fac.borrower_id = __borrowers.borr_pk_borrowerid CROSS JOIN bm WHERE __borrowers.sector = 'Technology' AND __financials.report_date = (SELECT MAX(__financials.report_date) FROM __financials) ORDER BY portfolio_spread_bps DESC"
     question: "Compare our Technology sector exposure against the latest Technology sector benchmarks for spread, leverage, and default rates"
     use_as_onboarding_question: false

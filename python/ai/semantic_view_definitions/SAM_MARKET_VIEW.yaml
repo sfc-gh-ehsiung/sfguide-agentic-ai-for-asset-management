@@ -116,13 +116,20 @@ tables:
       - name: scenario_type
         synonyms:
           - crisis_type
-        description: "Scenario type: Historical or Hypothetical"
+        description: "Stress scenario category: Commodity Shock, Credit Crisis, FX Shock, Geopolitical, Liquidity Crisis, Macro Stress, Market Crash, Rate Shock, Sector Crash"
         expr: SCENARIO_TYPE
         data_type: VARCHAR(50)
         is_enum: true
         sample_values:
-          - "HISTORICAL"
-          - "HYPOTHETICAL"
+          - "Commodity Shock"
+          - "Credit Crisis"
+          - "FX Shock"
+          - "Geopolitical"
+          - "Liquidity Crisis"
+          - "Macro Stress"
+          - "Market Crash"
+          - "Rate Shock"
+          - "Sector Crash"
       - name: scenario_description
         description: Detailed scenario description
         expr: DESCRIPTION
@@ -133,9 +140,9 @@ tables:
         data_type: VARCHAR(20)
         is_enum: true
         sample_values:
-          - "MODERATE"
-          - "SEVERE"
-          - "EXTREME"
+          - "Extreme"
+          - "Moderate"
+          - "Severe"
       - name: historical_reference
         description: Reference to historical event
         expr: HISTORICAL_REFERENCE
@@ -486,10 +493,10 @@ tables:
         is_enum: true
         sample_values:
           - "GDP"
-          - "CPI"
+          - "INFLATION"
+          - "INTEREST_RATE"
+          - "OTHER"
           - "UNEMPLOYMENT"
-          - "RETAIL_SALES"
-          - "INDUSTRIAL_PRODUCTION"
       - name: indicator_measure
         description: What the indicator measures
         expr: MEASURE

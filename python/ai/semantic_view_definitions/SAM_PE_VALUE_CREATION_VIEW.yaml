@@ -37,9 +37,8 @@ tables:
         data_type: VARCHAR(20)
         is_enum: true
         sample_values:
-          - "ACTIVE"
-          - "EXITED"
-          - "WRITE_DOWN"
+          - "Active"
+          - "Exited"
       - name: deal_lead
         synonyms:
           - partner
@@ -165,10 +164,11 @@ tables:
         data_type: VARCHAR(100)
         is_enum: true
         sample_values:
-          - "Revenue Growth"
           - "Cost Optimization"
-          - "Digital Transformation"
+          - "Digital"
           - "ESG"
+          - "Revenue Growth"
+          - "Working Capital"
       - name: initiative_name
         synonyms:
           - initiative
@@ -185,10 +185,9 @@ tables:
         data_type: VARCHAR(50)
         is_enum: true
         sample_values:
-          - "On Track"
           - "At Risk"
           - "Behind"
-          - "Completed"
+          - "On Track"
       - name: target_metric
         synonyms:
           - metric
@@ -293,9 +292,9 @@ tables:
         data_type: VARCHAR(20)
         is_enum: true
         sample_values:
-          - "GREEN"
-          - "AMBER"
-          - "RED"
+          - "Amber"
+          - "Green"
+          - "Red"
     metrics:
       - name: average_actual_kpi
         synonyms:

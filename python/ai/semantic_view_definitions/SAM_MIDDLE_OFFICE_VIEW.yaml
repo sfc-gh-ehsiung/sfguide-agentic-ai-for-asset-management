@@ -42,11 +42,8 @@ tables:
         data_type: VARCHAR(16)
         is_enum: true
         sample_values:
-          - "SETTLEMENT"
-          - "DIVIDEND"
-          - "FEE"
-          - "TRANSFER"
-          - "MARGIN"
+          - "Dividend"
+          - "Trade Settlement"
     facts:
       - name: movement_amount
         description: "Cash movement amount"
@@ -179,11 +176,9 @@ tables:
         data_type: VARCHAR(8)
         is_enum: true
         sample_values:
-          - "DIVIDEND"
-          - "STOCK_SPLIT"
-          - "RIGHTS_ISSUE"
-          - "MERGER"
-          - "SPIN_OFF"
+          - "Dividend"
+          - "Merger"
+          - "Split"
     metrics:
       - name: action_count
         synonyms:
@@ -399,9 +394,9 @@ tables:
         data_type: VARCHAR(8)
         is_enum: true
         sample_values:
-          - "POSITION"
-          - "CASH"
-          - "PRICE"
+          - "Cash"
+          - "Position"
+          - "Price"
       - name: recon_status
         synonyms:
           - resolution_status
@@ -410,9 +405,9 @@ tables:
         data_type: VARCHAR(13)
         is_enum: true
         sample_values:
-          - "OPEN"
-          - "RESOLVED"
-          - "ESCALATED"
+          - "Investigating"
+          - "Open"
+          - "Resolved"
     facts:
       - name: reconciliation_difference
         description: "Difference between expected and actual values"
@@ -530,10 +525,9 @@ tables:
         data_type: VARCHAR(7)
         is_enum: true
         sample_values:
-          - "PENDING"
-          - "SETTLED"
-          - "FAILED"
-          - "CANCELLED"
+          - "Failed"
+          - "Pending"
+          - "Settled"
     facts:
       - name: settlement_value
         description: "Settlement value of the trade"

@@ -157,9 +157,12 @@ tables:
         data_type: VARCHAR(16777216)
         is_enum: true
         sample_values:
-          - "REVENUE"
-          - "EPS"
-          - "PRICE_TARGET"
+          - "Customer Count"
+          - "EBITDA"
+          - "NRR"
+          - "Net Income"
+          - "Revenue"
+          - "TAM"
     facts:
       - name: consensus_high
         description: "Highest analyst estimate"
@@ -831,8 +834,8 @@ tables:
         data_type: VARCHAR(16777216)
         is_enum: true
         sample_values:
-          - "BUY"
-          - "SELL"
+          - "Acquired"
+          - "Disposed"
       - name: insider_ownership
         description: Direct or indirect ownership
         expr: OWNERSHIP

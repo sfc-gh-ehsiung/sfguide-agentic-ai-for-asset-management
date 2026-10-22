@@ -35,12 +35,12 @@ tables:
         data_type: VARCHAR(16777216)
         is_enum: true
         sample_values:
-          - "PENSION"
-          - "ENDOWMENT"
-          - "SOVEREIGN"
-          - "INSURANCE"
-          - "CORPORATE"
-          - "FAMILY_OFFICE"
+          - "Corporate"
+          - "Endowment"
+          - "Family Office"
+          - "Foundation"
+          - "Insurance"
+          - "Pension"
       - name: primary_contact
         synonyms:
           - contact
@@ -122,10 +122,9 @@ tables:
         data_type: VARCHAR(12)
         is_enum: true
         sample_values:
-          - "SUBSCRIPTION"
-          - "REDEMPTION"
-          - "DISTRIBUTION"
-          - "TRANSFER"
+          - "Redemption"
+          - "Subscription"
+          - "Transfer"
     facts:
       - name: flow_amount
         description: "Client flow amount (positive=inflow, negative=outflow)"
@@ -539,8 +538,6 @@ tables:
         is_enum: true
         sample_values:
           - "Lead"
-          - "Deputy"
-          - "Analyst"
 relationships:
   - name: client_flows_to_clients
     left_table: client_flows
@@ -587,11 +584,11 @@ verified_queries:
     question: What are the total fund flows?
     use_as_onboarding_question: true
   - name: CLIENT_AUM
-    sql: "SELECT * FROM SEMANTIC_VIEW({{DATABASE}}.AI.SAM_EXECUTIVE_VIEW METRICS total_aum_with_sam, client_count)"
+    sql: "SELECT * FROM SEMANTIC_VIEW({{DATABASE}}.AI.SAM_EXECUTIVE_VIEW METRICS clients.total_aum_with_sam, clients.client_count)"
     question: What is the total client AUM?
     use_as_onboarding_question: true
   - name: CLIENT_FLOWS
-    sql: "SELECT * FROM SEMANTIC_VIEW({{DATABASE}}.AI.SAM_EXECUTIVE_VIEW METRICS total_flow_amount, gross_inflows, gross_outflows)"
+    sql: "SELECT * FROM SEMANTIC_VIEW({{DATABASE}}.AI.SAM_EXECUTIVE_VIEW METRICS client_flows.total_flow_amount, client_flows.gross_inflows, client_flows.gross_outflows)"
     question: What are the client flow totals?
     use_as_onboarding_question: false
   - name: FIRM_AUM
@@ -603,18 +600,18 @@ verified_queries:
     question: What is the performance by strategy?
     use_as_onboarding_question: true
   - name: CLIENT_RELATIONSHIP_PROFILE
-    sql: "SELECT __clients.client_name, __clients.client_type, __clients.primary_contact, __clients.region, SUM(__clients.aum_with_sam) AS total_aum_with_sam, MIN(__client_flows.FlowDate) AS RelationshipStartDate, MAX(__client_flows.FlowDate) AS LastActivityDate FROM __client_flows JOIN __clients ON (__client_flows.CLIENTID = __clients.CLIENTID) GROUP BY __clients.client_name, __clients.client_type, __clients.primary_contact, __clients.region"
+    sql: "WITH flow_span AS (SELECT __client_flows.clie_pk_clientid AS client_id, MIN(__client_flows.client_flow_date) AS relationship_start_date, MAX(__client_flows.client_flow_date) AS last_activity_date FROM __client_flows GROUP BY __client_flows.clie_pk_clientid) SELECT __clients.client_name, __clients.client_type, __clients.primary_contact, __clients.region, __clients.aum_with_sam, flow_span.relationship_start_date, flow_span.last_activity_date FROM __clients LEFT JOIN flow_span ON flow_span.client_id = __clients.clie_pk_clientid ORDER BY __clients.aum_with_sam DESC"
     question: "What is the relationship profile for a specific client including AUM, type, and history?"
     use_as_onboarding_question: false
   - name: CLIENT_QUARTERLY_FLOWS
-    sql: "SELECT __clients.client_name, DATE_TRUNC(MONTH, __client_flows.FlowDate) AS flow_month, SUM(CASE WHEN __client_flows.FlowAmount > 0 THEN __client_flows.FlowAmount ELSE 0 END) AS Subscriptions, SUM(CASE WHEN __client_flows.FlowAmount < 0 THEN ABS(__client_flows.FlowAmount) ELSE 0 END) AS Redemptions, SUM(__client_flows.FlowAmount) AS NetFlows FROM __client_flows JOIN __clients ON (__client_flows.CLIENTID = __clients.CLIENTID) GROUP BY __clients.client_name, flow_month ORDER BY flow_month DESC"
+    sql: "SELECT __clients.client_name, DATE_TRUNC('QUARTER', __client_flows.client_flow_date) AS flow_quarter, SUM(CASE WHEN __client_flows.flow_amount > 0 THEN __client_flows.flow_amount ELSE 0 END) AS subscriptions, SUM(CASE WHEN __client_flows.flow_amount < 0 THEN ABS(__client_flows.flow_amount) ELSE 0 END) AS redemptions, SUM(__client_flows.flow_amount) AS net_flows FROM __client_flows JOIN __clients ON __client_flows.clie_pk_clientid = __clients.clie_pk_clientid GROUP BY __clients.client_name, DATE_TRUNC('QUARTER', __client_flows.client_flow_date) ORDER BY __clients.client_name, flow_quarter DESC"
     question: What is the quarterly flow history for a client showing subscriptions and redemptions?
     use_as_onboarding_question: false
   - name: CLIENT_PORTFOLIO_ALLOCATION
-    sql: "SELECT __clients.client_name, __portfolios.portfolio_name, __portfolios.strategy, SUM(__client_flows.FlowAmount) AS CurrentPosition FROM __client_flows JOIN __clients ON (__client_flows.CLIENTID = __clients.CLIENTID) JOIN __portfolios ON (__client_flows.PORTFOLIOID = __portfolios.PORTFOLIOID) GROUP BY __clients.client_name, __portfolios.portfolio_name, __portfolios.strategy HAVING CurrentPosition > 0 ORDER BY CurrentPosition DESC"
+    sql: "SELECT __clients.client_name, __portfolios.portfolio_name, __portfolios.strategy, SUM(__client_flows.flow_amount) AS current_position FROM __client_flows JOIN __clients ON __client_flows.clie_pk_clientid = __clients.clie_pk_clientid JOIN __portfolios ON __client_flows.clie_pk_portfolioid = __portfolios.port_pk_portfolioid GROUP BY __clients.client_name, __portfolios.portfolio_name, __portfolios.strategy HAVING SUM(__client_flows.flow_amount) > 0 ORDER BY current_position DESC"
     question: Which portfolios is a client invested in?
     use_as_onboarding_question: false
   - name: AT_RISK_CLIENTS
-    sql: "SELECT __clients.client_name, __clients.client_type, SUM(__client_flows.FlowAmount) AS NetFlow6M, SUM(CASE WHEN __client_flows.FlowAmount < 0 THEN ABS(__client_flows.FlowAmount) ELSE 0 END) AS TotalRedemptions, COUNT(__client_flows.FlowID) AS RedemptionCount FROM __client_flows JOIN __clients ON (__client_flows.CLIENTID = __clients.CLIENTID) GROUP BY __clients.client_name, __clients.client_type HAVING NetFlow6M < 0 ORDER BY NetFlow6M ASC"
+    sql: "SELECT __clients.client_name, __clients.client_type, SUM(__client_flows.flow_amount) AS net_flow_6m, SUM(CASE WHEN __client_flows.flow_amount < 0 THEN ABS(__client_flows.flow_amount) ELSE 0 END) AS total_redemptions_6m, COUNT_IF(__client_flows.flow_amount < 0) AS redemption_count_6m FROM __client_flows JOIN __clients ON __client_flows.clie_pk_clientid = __clients.clie_pk_clientid WHERE __client_flows.client_flow_date >= DATEADD(MONTH, -6, (SELECT MAX(__client_flows.client_flow_date) FROM __client_flows)) GROUP BY __clients.client_name, __clients.client_type HAVING SUM(__client_flows.flow_amount) < 0 ORDER BY net_flow_6m ASC"
     question: Which clients show redemption trends or declining engagement over the past 6 months?
     use_as_onboarding_question: false

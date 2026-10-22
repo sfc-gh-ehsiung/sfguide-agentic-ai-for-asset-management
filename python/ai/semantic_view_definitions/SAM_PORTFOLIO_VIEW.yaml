@@ -297,12 +297,10 @@ tables:
         data_type: VARCHAR(3)
         is_enum: true
         sample_values:
-          - "AAA"
-          - "AA"
           - "A"
-          - "BBB"
+          - "AA"
           - "BB"
-          - "B"
+          - "BBB"
           - "CCC"
     facts:
       - name: esg_score
